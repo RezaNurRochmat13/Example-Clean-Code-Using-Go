@@ -1,0 +1,8 @@
+# This is configuration file
+# MySQL Configuration
+
+[mysql]
+MySQLHost = "127.0.0.1:3306"
+MySQLUsername = "rejak13"
+MySQLPassword = "rejak13"
+MySQLDatabaseName = "bookstore"
