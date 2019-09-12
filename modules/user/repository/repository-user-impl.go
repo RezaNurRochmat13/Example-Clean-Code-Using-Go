@@ -47,3 +47,35 @@ func (userRepoImpl *userRepositoryImpl) FindAll() ([]model.User, error) {
 
 	return resultUser, nil
 }
+
+func (userRepoImpl *userRepositoryImpl) FindByID(id string) ([]model.User, error) {
+	var (
+		sql = "SELECT id_user, user_name, user_address, " +
+			"user_phone, user_age FROM user WHERE id_user = ?"
+		modelUser      model.User
+		resultUserById []model.User
+	)
+
+	queryUserById, errorHandlerQuery := userRepoImpl.Connection.Query(sql, id)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerQuery) {
+		return nil, errorHandlerQuery
+	}
+
+	for queryUserById.Next() {
+		errorHandlerScan := queryUserById.Scan(
+			&modelUser.IDUser,
+			&modelUser.Username,
+			&modelUser.UserAddress,
+			&modelUser.UserPhone,
+			&modelUser.UserAge)
+
+		if !utils.GlobalQueryErrorWithBool(errorHandlerScan) {
+			return nil, errorHandlerScan
+		}
+
+		resultUserById = append(resultUserById, modelUser)
+	}
+
+	return resultUserById, nil
+}

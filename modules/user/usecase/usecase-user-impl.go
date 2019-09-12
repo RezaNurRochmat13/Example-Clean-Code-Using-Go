@@ -24,3 +24,13 @@ func (userUsecaseImpl *userUseCaseImpl) FindAllUser() ([]model.User, error) {
 
 	return findAllUserResult, nil
 }
+
+func (userUsecaseImpl *userUseCaseImpl) FindUserByID(id string) ([]model.User, error) {
+	findUserByIDResult, errorHandlerUserRepo := userUsecaseImpl.userRepository.FindByID(id)
+
+	if !utils.GlobalErrorWithBool(errorHandlerUserRepo) {
+		return nil, errorHandlerUserRepo
+	}
+
+	return findUserByIDResult, nil
+}
