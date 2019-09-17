@@ -79,3 +79,9 @@ func (userRepoImpl *userRepositoryImpl) FindByID(id string) ([]model.User, error
 
 	return resultUserById, nil
 }
+
+func (userRepoImpl *userRepositoryImpl) Save(user model.User) (model.User, error) {
+	var (
+		sql = `INSERT INTO user(user_name)`
+	)
+}
