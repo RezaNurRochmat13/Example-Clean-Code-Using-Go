@@ -115,3 +115,40 @@ func (userRepoImpl *userRepositoryImpl) Save(user model.User) (model.User, error
 
 	return user, nil
 }
+
+func (userRepoImpl *userRepositoryImpl) Update(id string, userUpdate model.User) (model.User, error) {
+	sql := `UPDATE user SET user_name = ?, ` +
+		`user_address = ?, user_phone = ?, user_age = ? ` +
+		`WHERE id_user = ?`
+
+	initTransaction, errorHandlerTransaction := userRepoImpl.Connection.Begin()
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerTransaction) {
+		return model.User{}, errorHandlerTransaction
+	}
+
+	defer initTransaction.Rollback()
+
+	queryUpdateUser, errorHandlerQuery := userRepoImpl.Connection.Prepare(sql)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerQuery) {
+		return model.User{}, errorHandlerQuery
+	}
+
+	_, errorHandlerExecStmt := queryUpdateUser.Exec(
+		userUpdate.Username, userUpdate.UserAddress,
+		userUpdate.UserPhone, userUpdate.UserAge, id)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerExecStmt) {
+		return model.User{}, errorHandlerExecStmt
+	}
+
+	errorHandlerCommitTrans := initTransaction.Commit()
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerCommitTrans) {
+		return model.User{}, errorHandlerCommitTrans
+	}
+
+	return userUpdate, nil
+
+}

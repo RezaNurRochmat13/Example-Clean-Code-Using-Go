@@ -44,3 +44,24 @@ func (userUsecaseImpl *userUseCaseImpl) SaveUser(userPayload model.User) (model.
 
 	return saveUserRepo, nil
 }
+
+func (userUsecaseImpl *userUseCaseImpl) UpdateUser(id string, userUpdate model.User) (model.User, error) {
+	findUserRepo, errorHandlerRepo := userUsecaseImpl.userRepository.FindByID(id)
+
+	if !utils.GlobalErrorWithBool(errorHandlerRepo) {
+		return model.User{}, errorHandlerRepo
+	}
+
+	if findUserRepo == nil {
+		return model.User{}, nil
+	}
+
+	updateUserRepo, errorHandlerRepo := userUsecaseImpl.userRepository.Update(id, userUpdate)
+
+	if !utils.GlobalErrorWithBool(errorHandlerRepo) {
+		return model.User{}, errorHandlerRepo
+	}
+
+	return updateUserRepo, nil
+
+}

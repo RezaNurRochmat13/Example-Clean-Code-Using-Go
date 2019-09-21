@@ -23,6 +23,7 @@ func NewUserHandler(e *echo.Echo, usecase user.Usecase) {
 	groupingPath.GET("/users", handlerWithInjection.GetAllUsersHandler)
 	groupingPath.GET("/users/:id", handlerWithInjection.GetDetailUsers)
 	groupingPath.POST("/users", handlerWithInjection.CreateNewUsers)
+	groupingPath.PUT("/users/:id", handlerWithInjection.UpdateUser)
 
 }
 
@@ -90,4 +91,36 @@ func (userHandler *UserHandler) CreateNewUsers(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated,
 		echo.Map{"success": http.StatusCreated,
 			"created_resource": saveUserUsecase})
+}
+
+func (userHandler *UserHandler) UpdateUser(ctx echo.Context) error {
+	var (
+		modelUser model.User
+		id        = ctx.Param("id")
+	)
+
+	errorHandlerBindJSON := ctx.Bind(&modelUser)
+
+	if !utils.GlobalErrorWithBool(errorHandlerBindJSON) {
+		log.Printf("Error when bind json : %s", errorHandlerBindJSON)
+		return ctx.JSON(http.StatusBadRequest,
+			echo.Map{"error": "Invalid body request. View logs more info"})
+	}
+
+	updateUserUsecase, errorHandlerUseCase := userHandler.UserUseCase.UpdateUser(id, modelUser)
+
+	if !utils.GlobalErrorWithBool(errorHandlerUseCase) {
+		log.Printf("Error when bind json : %s", errorHandlerUseCase)
+		return ctx.JSON(http.StatusBadRequest,
+			echo.Map{"error": "Invalid request. View logs more info"})
+	}
+
+	if updateUserUsecase.Username == "" {
+		return ctx.JSON(http.StatusBadRequest,
+			echo.Map{"error": "Data Not Found. View logs more info"})
+	}
+
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"success":      http.StatusOK,
+		"updated_user": updateUserUsecase})
 }
