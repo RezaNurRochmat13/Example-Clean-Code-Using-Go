@@ -6,4 +6,5 @@ import "clean-arch/modules/user/model"
 type Usecase interface {
 	FindAllUser() ([]model.User, error)
 	FindUserByID(id string) ([]model.User, error)
+	SaveUser(user model.User) (model.User, error)
 }

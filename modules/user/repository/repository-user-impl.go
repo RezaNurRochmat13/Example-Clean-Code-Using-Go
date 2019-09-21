@@ -82,6 +82,36 @@ func (userRepoImpl *userRepositoryImpl) FindByID(id string) ([]model.User, error
 
 func (userRepoImpl *userRepositoryImpl) Save(user model.User) (model.User, error) {
 	var (
-		sql = `INSERT INTO user(user_name)`
+		sql = `INSERT INTO user(user_name, user_address, user_phone, user_age) ` +
+			`VALUES(?, ?, ?, ?)`
 	)
+
+	initTransaction, errorHandlerTransaction := userRepoImpl.Connection.Begin()
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerTransaction) {
+		return model.User{}, errorHandlerTransaction
+	}
+
+	defer initTransaction.Rollback()
+
+	querySaveUser, errorHandlerQuery := userRepoImpl.Connection.Prepare(sql)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerQuery) {
+		return model.User{}, errorHandlerQuery
+	}
+
+	_, errorHandlerExecStmt := querySaveUser.Exec(user.Username,
+		user.UserAddress, user.UserPhone, user.UserAge)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerExecStmt) {
+		return model.User{}, errorHandlerExecStmt
+	}
+
+	errorHandlerCommitTrans := initTransaction.Commit()
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerCommitTrans) {
+		return model.User{}, errorHandlerCommitTrans
+	}
+
+	return user, nil
 }

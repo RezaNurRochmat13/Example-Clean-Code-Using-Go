@@ -34,3 +34,13 @@ func (userUsecaseImpl *userUseCaseImpl) FindUserByID(id string) ([]model.User, e
 
 	return findUserByIDResult, nil
 }
+
+func (userUsecaseImpl *userUseCaseImpl) SaveUser(userPayload model.User) (model.User, error) {
+	saveUserRepo, errorHandlerRepo := userUsecaseImpl.userRepository.Save(userPayload)
+
+	if !utils.GlobalErrorWithBool(errorHandlerRepo) {
+		return model.User{}, errorHandlerRepo
+	}
+
+	return saveUserRepo, nil
+}

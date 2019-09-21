@@ -2,7 +2,9 @@ package http
 
 import (
 	"clean-arch/modules/user"
+	"clean-arch/modules/user/model"
 	"clean-arch/utils"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -20,6 +22,7 @@ func NewUserHandler(e *echo.Echo, usecase user.Usecase) {
 	groupingPath := e.Group("/api/v1")
 	groupingPath.GET("/users", handlerWithInjection.GetAllUsersHandler)
 	groupingPath.GET("/users/:id", handlerWithInjection.GetDetailUsers)
+	groupingPath.POST("/users", handlerWithInjection.CreateNewUsers)
 
 }
 
@@ -63,4 +66,28 @@ func (userHandler *UserHandler) GetDetailUsers(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, echo.Map{
 		"data": findUserByIdUsecase,
 	})
+}
+
+func (userHandler *UserHandler) CreateNewUsers(ctx echo.Context) error {
+	var modelUser model.User
+
+	errorHandlerBind := ctx.Bind(&modelUser)
+
+	if !utils.GlobalErrorWithBool(errorHandlerBind) {
+		log.Printf("Error when access usecase : %s", errorHandlerBind)
+		return ctx.JSON(http.StatusBadRequest,
+			echo.Map{"error": "Invalid body request"})
+	}
+
+	saveUserUsecase, errorHandlerUseCase := userHandler.UserUseCase.SaveUser(modelUser)
+
+	if !utils.GlobalErrorWithBool(errorHandlerUseCase) {
+		log.Printf("Error when access usecase : %s", errorHandlerUseCase)
+		return ctx.JSON(http.StatusBadRequest,
+			echo.Map{"error": "System cannot process. View logs more info"})
+	}
+
+	return ctx.JSON(http.StatusCreated,
+		echo.Map{"success": http.StatusCreated,
+			"created_resource": saveUserUsecase})
 }
