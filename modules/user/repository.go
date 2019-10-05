@@ -8,4 +8,5 @@ type Repository interface {
 	FindByID(id string) ([]model.User, error)
 	Save(user model.User) (model.User, error)
 	Update(id string, user model.User) (model.User, error)
+	Delete(id string) error
 }

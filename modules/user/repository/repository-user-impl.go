@@ -152,3 +152,40 @@ func (userRepoImpl *userRepositoryImpl) Update(id string, userUpdate model.User)
 	return userUpdate, nil
 
 }
+
+func (userRepoImpl *userRepositoryImpl) Delete(id string) error {
+	sql := "DELETE FROM user WHERE id_user = ?"
+
+	initTransaction, errorHandlerTransaction := userRepoImpl.Connection.Begin()
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerTransaction) {
+		initTransaction.Rollback()
+		return errorHandlerTransaction
+	}
+
+	defer initTransaction.Rollback()
+
+	preparedStmt, errorHandlerPreparedStmt := initTransaction.Prepare(sql)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerPreparedStmt) {
+		initTransaction.Rollback()
+		return errorHandlerPreparedStmt
+	}
+
+	_, errorHandlerExecStmt := preparedStmt.Exec(id)
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerExecStmt) {
+		initTransaction.Rollback()
+		return errorHandlerExecStmt
+	}
+
+	errorHandlerCommitTransaction := initTransaction.Commit()
+
+	if !utils.GlobalQueryErrorWithBool(errorHandlerCommitTransaction) {
+		initTransaction.Rollback()
+		return errorHandlerCommitTransaction
+	}
+
+	return nil
+
+}

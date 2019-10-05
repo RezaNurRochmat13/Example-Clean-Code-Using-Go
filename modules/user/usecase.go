@@ -8,4 +8,5 @@ type Usecase interface {
 	FindUserByID(id string) ([]model.User, error)
 	SaveUser(user model.User) (model.User, error)
 	UpdateUser(id string, userUpdate model.User) (model.User, error)
+	DeleteUser(id string) error
 }

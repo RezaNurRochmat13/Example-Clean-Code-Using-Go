@@ -24,6 +24,7 @@ func NewUserHandler(e *echo.Echo, usecase user.Usecase) {
 	groupingPath.GET("/users/:id", handlerWithInjection.GetDetailUsers)
 	groupingPath.POST("/users", handlerWithInjection.CreateNewUsers)
 	groupingPath.PUT("/users/:id", handlerWithInjection.UpdateUser)
+	groupingPath.DELETE("/users/:id", handlerWithInjection.DeleteUserHandler)
 
 }
 
@@ -123,4 +124,21 @@ func (userHandler *UserHandler) UpdateUser(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, echo.Map{
 		"success":      http.StatusOK,
 		"updated_user": updateUserUsecase})
+}
+
+func (userHandler *UserHandler) DeleteUserHandler(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	errorHandlerDeleteUserUseCase := userHandler.UserUseCase.DeleteUser(id)
+
+	if !utils.GlobalErrorWithBool(errorHandlerDeleteUserUseCase) {
+		ctx.JSON(http.StatusBadRequest, echo.Map{
+			"status": http.StatusBadRequest,
+			"error":  errorHandlerDeleteUserUseCase,
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, echo.Map{
+		"message": "User deleted successfully",
+	})
 }

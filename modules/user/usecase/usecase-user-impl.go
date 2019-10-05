@@ -65,3 +65,14 @@ func (userUsecaseImpl *userUseCaseImpl) UpdateUser(id string, userUpdate model.U
 	return updateUserRepo, nil
 
 }
+
+func (userUsecaseImpl *userUseCaseImpl) DeleteUser(id string) error {
+
+	errorHandlerDeleteUserRepo := userUsecaseImpl.userRepository.Delete(id)
+
+	if !utils.GlobalErrorWithBool(errorHandlerDeleteUserRepo) {
+		return errorHandlerDeleteUserRepo
+	}
+
+	return nil
+}

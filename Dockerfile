@@ -1,7 +1,5 @@
 FROM frolvlad/alpine-glibc
 
-COPY log log
-
 COPY config config
 
 RUN apk add --no-cache bash
